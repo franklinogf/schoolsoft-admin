@@ -5,18 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class School extends Model
+class Feature extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'id';
+    protected $primaryKey = 'name';
 
     public $incrementing = false;
 
     protected $keyType = 'string';
 
-    protected $casts = [
-        'enviroments' => 'array',
-        'features' => 'json',
-    ];
+    public $timestamps = false;
 }
