@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('schools', function (Blueprint $table) {
+            $table->string('dbname')->unique();
+            $table->string('dbuser');
+            $table->string('dbpassword');
+            $table->renameColumn('data', 'enviroments');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('schools', function (Blueprint $table) {
+            $table->dropColumn('dbname');
+            $table->dropColumn('dbuser');
+            $table->dropColumn('dbpassword');
+            $table->renameColumn('enviroments', 'data');
+        });
+    }
+};
