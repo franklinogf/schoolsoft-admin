@@ -28,7 +28,15 @@ class SchoolResource extends Resource
 
     public static function form(Form $form): Form
     {
-        // $features = ;
+        $featuresToggles = Feature::all()
+            ->map(fn (Feature $feature) => Toggle::make(name: $feature->name)->default(false))->toArray();
+        $enviroments = Enviroment::all()->map(function (Enviroment $enviroment) {
+            return FieldSet::make($enviroment->name)
+                ->statePath($enviroment->name)
+                ->columnSpanFull()
+                ->schema([TextInput::make('value'), TextInput::make('other')]);
+        }
+        )->toArray();
 
         return $form
             ->schema([
@@ -54,42 +62,45 @@ class SchoolResource extends Resource
                             ])->columns(3),
                     ]),
                     Tab::make('Enviroments')->schema([
-                        Repeater::make('enviroments')
-                            ->label(null)
-                            ->schema([
-                                TextInput::make('key')
-                                    ->readOnly()
-                                    ->distinct()
-                                    ->label('Key')
-                                    ->required(),
-                                TextInput::make('value')
-                                    ->label('Value')->nullable(),
-                                TextInput::make('other')
-                                    ->label('Other value')->nullable(),
+                        Group::make()->statePath('enviroments')
+                            ->schema($enviroments)
+                            ->columns(['sm' => 2, 'md' => 6])->grow(false),
+                        // Repeater::make('enviroments')
+                        //     ->label(null)
+                        //     ->schema([
+                        //         TextInput::make('key')
+                        //             ->readOnly()
+                        //             ->distinct()
+                        //             ->label('Key')
+                        //             ->required(),
+                        //         TextInput::make('value')
+                        //             ->label('Value')->nullable(),
+                        //         TextInput::make('other')
+                        //             ->label('Other value')->nullable(),
 
-                            ])
-                            ->columnSpanFull()
-                            ->columns(3)
-                            ->addable(false)
-                            ->deletable(false)
-                            ->reorderable(false)
-                            ->collapsible()
-                            ->afterStateHydrated(function (Repeater $component, $state) {
-                                $configs = new Collection($state);
-                                $array = Enviroment::all()->pluck('name')->map(function ($key) use ($configs) {
-                                    $config = $configs->firstWhere('key', $key);
+                        //     ])
+                        //     ->columnSpanFull()
+                        //     ->columns(3)
+                        //     ->addable(false)
+                        //     ->deletable(false)
+                        //     ->reorderable(false)
+                        //     ->collapsible()
+                        //     ->afterStateHydrated(function (Repeater $component, $state) {
+                        //         $configs = new Collection($state);
+                        //         $array = Enviroment::all()->pluck('name')->map(function ($key) use ($configs) {
+                        //             $config = $configs->firstWhere('key', $key);
 
-                                    return ['key' => $key, 'value' => $config['value'] ?? null, 'other' => $config['other'] ?? null];
-                                })->toArray();
-                                $component->state($array);
+                        //             return ['key' => $key, 'value' => $config['value'] ?? null, 'other' => $config['other'] ?? null];
+                        //         })->toArray();
+                        //         $component->state($array);
 
-                            })->itemLabel(fn (array $state): ?string => $state['key'] ?? null),
+                        //     })->itemLabel(fn (array $state): ?string => $state['key'] ?? null),
                     ]),
                     Tab::make('Features')->schema([
                         Group::make()->statePath('features')
-                            ->schema(Feature::all()
-                                ->map(fn ($feature) => Toggle::make(name: $feature->name)->default(false))->toArray())
-                            ->columns(['sm' => 2, 'md' => 6])->grow(false)]),
+                            ->schema($featuresToggles)
+                            ->columns(['sm' => 2, 'md' => 6])->grow(false),
+                    ]),
                 ])->columnSpanFull(),
 
             ]);
